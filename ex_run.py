@@ -16,6 +16,10 @@ p.driver.options['optimizer'] = 'SNOPT'
 p.driver.options['dynamic_simul_derivs'] = True
 #p.driver.set_simul_deriv_color('coloring.json')
 #p.driver.opt_settings['Start'] = 'Cold'
+p.driver.opt_settings["Major step limit"] = 2.0 #2.0
+p.driver.opt_settings['Major iterations limit'] = 1000
+p.driver.opt_settings['Major feasibility tolerance'] = 1.0E-4
+p.driver.opt_settings['Major optimality tolerance'] = 1.0E-4
 p.driver.opt_settings['iSumm'] = 6
 
 
@@ -80,6 +84,10 @@ for i in range(n_traj):
     phase.add_control('p%dvy' % i, rate_continuity=False, units='m/s', 
                       opt=True, upper=10, lower=-10.0, scaler=200.0, adder=-10)
 
+    phase.add_design_parameter('departure_time%d' % i, opt=False, val=t_start)
+    phase.add_design_parameter('destination_x%d' % i, opt=False, val=end_x)
+    phase.add_design_parameter('destination_y%d' % i, opt=False, val=end_y)
+
 phase.add_objective('time', loc='final', scaler=1.0) #71000
 
 p.setup()
@@ -98,7 +106,30 @@ for i in range(n_traj):
 
 p.run_driver()
 
-exp_out = phase.simulate(times='all', record=False)
+exp_out = phase.simulate()
+
+#val = exp_out.get_val('phase0.timeseries.design_parameters:departure_time0')
+
+import matplotlib.pyplot as plt
+circle = plt.Circle((0, 0), 4000, fill=False)
+plt.gca().add_artist(circle)
+
+t = exp_out.get_val('phase0.timeseries.time')
+print("total time:", t[-1])
+for i in range(n_traj):
+    x = exp_out.get_val('phase0.timeseries.states:p%dx' % i)
+    y = exp_out.get_val('phase0.timeseries.states:p%dy' % i)
+
+    plt.plot(x, y, 'gray')
+    plt.scatter(x, y, cmap='Greens', c=t)
+
+plt.show()
+
+
+
+
+
+
 
 
 

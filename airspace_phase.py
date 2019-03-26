@@ -23,6 +23,16 @@ class PlaneODE2D(Group):
         ode_options.declare_parameter(name='p%dvy' % i, targets = 'p%d.vy' % i, 
                                       units='m/s')
 
+        ode_options.declare_parameter(name='departure_time%d' % i, 
+                                      targets='p%d.departure_time' % i, 
+                                      dynamic=False)
+        ode_options.declare_parameter(name='destination_x%d' % i, 
+                                      targets='p%d.destination_x' % i, 
+                                      dynamic=False)
+        ode_options.declare_parameter(name='destination_y%d' % i, 
+                                      targets='p%d.destination_y' % i, 
+                                      dynamic=False)
+
     def initialize(self):   
         self.options.declare('num_nodes', types=int)
 

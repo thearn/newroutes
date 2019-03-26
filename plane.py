@@ -96,6 +96,7 @@ class PlanePath2D(ExplicitComponent):
         partials['y_dot', 'vy'] = 1.0
 
         dist = np.sqrt((x - dx)**2 + (y - dy)**2)
+        dist[np.where(dist < 1)] = 1.0
         mask = (np.tanh(t - ts) + 1.0) / 2.0
         dt = -0.5*np.tanh(t - ts)**2 + 0.5
 
