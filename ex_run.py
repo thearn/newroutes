@@ -34,7 +34,7 @@ p.model.add_subsystem('phase0', phase)
 
 max_time = 6500.0
 
-phase.set_time_options(initial_bounds=(0, 0), duration_bounds=(1, max_time))
+phase.set_time_options(initial_bounds=(0, 0), duration_bounds=(10, max_time))
 
 
 locations = []
@@ -87,6 +87,8 @@ for i in range(n_traj):
     phase.add_design_parameter('departure_time%d' % i, opt=False, val=t_start)
     phase.add_design_parameter('destination_x%d' % i, opt=False, val=end_x)
     phase.add_design_parameter('destination_y%d' % i, opt=False, val=end_y)
+
+    #phase.add_constraint('p%d.departure_hold' % i, upper=0.0)
 
 phase.add_objective('time', loc='final', scaler=1.0) #71000
 

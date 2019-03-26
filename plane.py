@@ -53,10 +53,14 @@ class PlanePath2D(ExplicitComponent):
                         val=np.zeros(nn),
                         desc='S')
 
+        self.add_output(name='departure_hold',
+                        val=0.0)
+
         ar = np.arange(nn)
 
         self.declare_partials('x_dot', 'vx', rows=ar, cols=ar)
         self.declare_partials('y_dot', 'vy', rows=ar, cols=ar)
+        self.declare_partials('departure_hold', ['vx', 'vy'])
         self.declare_partials('distance_to_destination', ['x', 'y', 'time'], rows=ar, cols=ar)
 
     def compute(self, inputs, outputs):
@@ -76,6 +80,8 @@ class PlanePath2D(ExplicitComponent):
 
         dist = np.sqrt((x - dx)**2 + (y - dy)**2)
         mask = (np.tanh(t - ts) + 1.0) / 2.0
+
+        outputs['departure_hold'] = np.sum((vx**2 + vy**2) * (1 - mask))
 
         outputs['distance_to_destination'] = dist * mask
 
@@ -99,6 +105,10 @@ class PlanePath2D(ExplicitComponent):
         dist[np.where(dist < 1)] = 1.0
         mask = (np.tanh(t - ts) + 1.0) / 2.0
         dt = -0.5*np.tanh(t - ts)**2 + 0.5
+
+        partials['departure_hold', 'vx'] = (1 - mask) * (2 * vx)
+        partials['departure_hold', 'vy'] = (1 - mask) * (2 * vy)
+        #partials['departure_hold', 'time'] = (1 - mask) * (2 * vx)
 
         partials['distance_to_destination', 'x'] = (x - dx)/dist * mask
         partials['distance_to_destination', 'y'] = (y - dy)/dist * mask
